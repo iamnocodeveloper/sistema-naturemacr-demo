@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naturema CR · Sistema de pedidos (demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#10382c; --navy2:#185544; --ink:#1c2a24; --gray:#5c6b64; --line:#e2e8e4;
+  --bg:#f1f5f2; --card:#ffffff; --amber:#c7912a; --amber-soft:#faf1da;
+  --ok:#1f8a5b; --warn:#c9762a; --cold:#7a8496; --blue:#2f6fb0;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.01em}
+a{color:var(--blue);text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+.app{display:grid;grid-template-columns:252px 1fr;min-height:100vh}
+/* Sidebar */
+.side{background:var(--navy);color:#d9e6df;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand .logo{display:flex;align-items:center;gap:10px}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--amber),#a5751d);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.brand .mark svg{width:19px;height:19px}
+.brand b{font-size:15px;color:#fff;font-weight:700;letter-spacing:-.02em;display:block}
+.brand small{font-size:11px;color:#93b3a5;text-transform:uppercase;letter-spacing:.09em}
+.nav{padding:10px 10px;display:flex;flex-direction:column;gap:2px}
+.nav button{display:flex;align-items:center;gap:11px;background:none;border:0;color:#b8d0c5;padding:10px 12px;border-radius:9px;font-size:14px;text-align:left;width:100%}
+.nav button svg{width:18px;height:18px;flex:0 0 auto;opacity:.9}
+.nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav button.active{background:var(--navy2);color:#fff;box-shadow:inset 3px 0 0 var(--amber)}
+.nav .sep{margin:8px 12px;border-top:1px solid rgba(255,255,255,.08)}
+.side .foot{margin-top:auto;padding:14px 16px;font-size:11px;color:#83a596;border-top:1px solid rgba(255,255,255,.08)}
+/* Main */
+.main{min-width:0;display:flex;flex-direction:column}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20}
+.top .who{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--gray)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.content{padding:22px;max-width:1180px;width:100%;margin:0 auto}
+.page-title{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.page-title h2{font-size:21px}
+.page-title p{margin:3px 0 0;color:var(--gray);font-size:13px}
+.sec{display:none}
+.sec.on{display:block}
+/* Buttons */
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:9px 14px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+.btn svg{width:16px;height:16px}
+.btn:hover{border-color:#c9d1de;background:#fbfcfe}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.primary:hover{background:var(--navy2)}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:#332506;font-weight:600}
+.btn.amber:hover{background:#b5821e}
+.btn.sm{padding:6px 11px;font-size:12.5px}
+.btn.ghost{background:transparent}
+/* Cards */
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);min-width:0}
+.card .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card .hd h3{font-size:14px}
+.card .bd{padding:16px}
+.kpi{padding:16px 18px;position:relative}
+.kpi .n{font-size:27px;font-weight:700;letter-spacing:-.02em}
+.kpi .l{font-size:12.5px;color:var(--gray);margin-top:2px}
+.kpi .t{font-size:11.5px;color:var(--amber);font-weight:600;margin-top:7px}
+.kpi .ico{float:right;width:34px;height:34px;border-radius:9px;background:var(--amber-soft);display:flex;align-items:center;justify-content:center}
+.kpi .ico svg{width:18px;height:18px;color:var(--amber)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.s-nuevo{background:#eaf1fb;color:#2560a6}
+.s-confirmado{background:#e9f2ff;color:#1d5fa8}
+.s-preparando{background:#fdf3dd;color:#a06b0c}
+.s-enviado{background:#f4ecfd;color:#6c3bb0}
+.s-entregado{background:#e6f5ee;color:#157a4e}
+.s-cancelado{background:#f3e4e4;color:#a13b3b}
+.c-nuevo{background:#eef0f4;color:#5b6577}
+.c-web{background:#e8f1fe;color:#2461a6}
+.c-whatsapp{background:#e3f6e9;color:#1c7a45}
+.c-tienda{background:#faf1da;color:#8a6417}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+.low{background:#fdeaea;color:#b1382f;font-weight:600}
+/* Table */
+.table-wrap{overflow-x:auto;min-width:0}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);font-weight:600;background:#f8faf9}
+tbody tr:hover{background:#f8faf9;cursor:pointer}
+td.wrap,th.wrap{white-space:normal;min-width:150px}
+td.arts{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--gray);font-size:12.5px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+/* Filters */
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.input{position:relative;flex:1;min-width:180px}
+.input svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#98a2b3}
+.input input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;background:#fff}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--gray)}
+.chip.active{background:var(--navy);border-color:var(--navy);color:#fff}
+/* info rows */
+.info-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.info-row:last-child{border-bottom:0}
+.info-row .k{color:var(--gray)}
+.info-row .v{font-weight:600;text-align:right}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{position:relative;padding:0 0 16px 26px;border-left:2px solid var(--line);margin-left:6px}
+.timeline li:last-child{border-left-color:transparent;padding-bottom:0}
+.timeline li::before{content:'';position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px #fff}
+.timeline .tt{font-weight:600;font-size:13.5px}
+.timeline .dd{font-size:12px;color:var(--gray)}
+/* whatsapp */
+.wa{background:#e7ded4;border-radius:14px;padding:14px;background-image:radial-gradient(rgba(255,255,255,.35) 1px,transparent 1px);background-size:14px 14px}
+.wa .phone{background:#075e54;color:#fff;border-radius:10px 10px 0 0;padding:9px 12px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px}
+.wa .thread{background:#efe7dd;padding:14px 10px;border-radius:0 0 10px 10px;min-height:120px}
+.wa .msg{background:#fff;max-width:88%;padding:8px 11px;border-radius:10px;font-size:13px;box-shadow:0 1px 1px rgba(0,0,0,.08);margin-bottom:9px;position:relative;white-space:pre-wrap;word-break:break-word}
+.wa .msg .tm{font-size:10px;color:#8b9199;text-align:right;margin-top:3px}
+.wa .msg.out{background:#dcf8c6;margin-left:auto}
+/* charts */
+.chart{display:flex;align-items:flex-end;gap:10px;height:190px;padding-top:10px}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;height:100%;justify-content:flex-end}
+.chart .bar{width:100%;max-width:44px;background:linear-gradient(180deg,#2f8a63,#175a41);border-radius:6px 6px 0 0;transition:.3s;min-height:3px}
+.chart .bar.alt{background:linear-gradient(180deg,var(--amber),#a5751d)}
+.chart .cl{font-size:11px;color:var(--gray)}
+.chart .cv{font-size:11px;font-weight:600;color:var(--ink)}
+.hbar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
+.hbar-row .lb{width:150px;flex:0 0 auto;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar-row .tr{flex:1;background:#eef1f6;border-radius:6px;height:20px;overflow:hidden}
+.hbar-row .tr i{display:block;height:100%;background:var(--amber);border-radius:6px}
+.hbar-row .vl{width:78px;text-align:right;font-weight:600;color:var(--gray);font-variant-numeric:tabular-nums}
+.modal{position:fixed;inset:0;background:rgba(16,24,40,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:60}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:16px;max-width:600px;width:100%;max-height:92vh;overflow:auto;padding:22px}
+label.f{display:block;font-size:12.5px;font-weight:600;color:var(--gray);margin:12px 0 5px}
+input.f,select.f,textarea.f{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;font-family:inherit}
+input.f:focus,select.f:focus{outline:2px solid #cfe0d7;border-color:#9dc3b1}
+.note{background:#f8faf9;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12.5px;color:var(--gray)}
+/* welcome */
+.welcome{position:fixed;inset:0;background:linear-gradient(140deg,#08231a,#10382c 55%,#185544);color:#fff;display:flex;align-items:center;justify-content:center;padding:22px;z-index:80}
+.welcome .in{max-width:500px;text-align:center}
+.welcome .mark{width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--amber),#a5751d);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.welcome .mark svg{width:32px;height:32px}
+.welcome h1{font-size:25px;color:#fff}
+.welcome p{color:#bcd3c8;margin:10px 0 22px;font-size:14px}
+.welcome .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.welcome .tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--amber);margin-bottom:10px}
+.welcome .legal{margin-top:26px;font-size:11.5px;color:#84a596}
+/* tour */
+.tour-dim{position:fixed;inset:0;background:transparent;z-index:90;pointer-events:none}
+.tour-spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(6,20,15,.74),0 0 0 3px var(--amber);z-index:91;pointer-events:none;transition:all .28s ease}
+.tour-card{position:fixed;z-index:92;background:#fff;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.35);max-width:380px;width:calc(100% - 28px);padding:18px}
+.tour-card .step{font-size:11.5px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em}
+.tour-card h3{font-size:16.5px;margin:7px 0 8px;color:var(--navy)}
+.tour-card p{margin:0;font-size:13.5px;color:var(--gray)}
+.tour-card .navrow{display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap}
+.tour-card .navrow .sp{flex:1}
+.tour-card .prog{height:4px;border-radius:3px;background:#eef1f6;margin-top:14px;overflow:hidden;display:none}
+.tour-card .prog.on{display:block}
+.tour-card .prog i{display:block;height:100%;background:var(--amber);width:0}
+.tour-close{position:fixed;top:14px;right:14px;z-index:93;background:#fff;border:0;border-radius:999px;padding:9px 14px;font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;z-index:120;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+.foot-note{text-align:center;color:var(--gray);font-size:12px;padding:26px 16px;border-top:1px solid var(--line);margin-top:26px}
+/* responsive */
+@media(max-width:960px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .app{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;bottom:0;width:252px;transform:translateX(-100%);transition:.25s;z-index:70;height:100vh}
+  .side.open{transform:none}
+  .menu-btn{display:inline-flex!important}
+  .scrim{position:fixed;inset:0;background:rgba(6,20,15,.5);z-index:65;display:none}
+  .scrim.on{display:block}
+  .content{padding:14px}
+  .g4{grid-template-columns:1fr}
+  .tour-card{max-width:none}
+  #crumb{display:none}
+  .top .who > span{display:none}
+  .top{padding:12px 14px}
+  .hbar-row .lb{width:110px}
+}
+.menu-btn{display:none;background:none;border:0;padding:6px}
+.menu-btn svg{width:22px;height:22px;color:var(--navy)}
+</style>
+</head>
+<body>
+
+<!-- ===== WELCOME / ENTRADA ===== -->
+<div class="welcome" id="welcome">
+  <div class="in">
+    <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#332506" stroke-width="1.9"><path d="M5 8h11a3 3 0 0 1 0 6h-1"/><path d="M6 8v5a5 5 0 0 0 5 5h0a5 5 0 0 0 5-5"/><path d="M9 4h6"/><path d="M4 21h14"/></svg></div>
+    <span class="tag">Demo de sistema de pedidos</span>
+    <h1>Naturema CR · La Matería de Escazú</h1>
+    <p>Yerbas, mates y bombillas desde 2017. Este sistema ordena los pedidos que llegan por la web y por WhatsApp y evita que se pierdan entre el chat y la tienda. Es un ejemplo navegable con datos ficticios.</p>
+    <div class="btns">
+      <button class="btn amber" onclick="enterApp()">Entrar al sistema</button>
+      <button class="btn" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff" onclick="enterApp();setTimeout(startTour,350)">Ver el recorrido guiado</button>
+    </div>
+    <div class="legal">Demo de referencia hecho por Nocodeveloper. Los datos son de ejemplo.</div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" onclick="toggleSide()"></div>
+
+<div class="app">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="side" id="side">
+    <div class="brand">
+      <div class="logo">
+        <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#332506" stroke-width="1.9"><path d="M5 8h11a3 3 0 0 1 0 6h-1"/><path d="M6 8v5a5 5 0 0 0 5 5h0a5 5 0 0 0 5-5"/><path d="M9 4h6"/><path d="M4 21h14"/></svg></div>
+        <div><b>Naturema CR</b><small>Escazú · San José</small></div>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-sec="panel" class="active" onclick="go('panel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Panel del día</button>
+      <button data-sec="bandeja" onclick="go('bandeja')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="7" cy="7" r="1.3"/><circle cx="7" cy="12" r="1.3"/><circle cx="7" cy="17" r="1.3"/></svg>Pedidos</button>
+      <button data-sec="catalogo" onclick="go('catalogo')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7l8-4 8 4-8 4-8-4z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M12 11v10"/></svg>Catálogo e inventario</button>
+      <button data-sec="clientes" onclick="go('clientes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.6 2.6-5.6 5.5-5.6S14.5 16.4 14.5 20"/><path d="M17 8h4M17 12h4"/></svg>Clientes</button>
+      <button data-sec="envios" onclick="go('envios')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg>Envíos</button>
+      <button data-sec="caja" onclick="go('caja')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="12" cy="14" r="2"/></svg>Caja del día</button>
+      <button data-sec="informes" onclick="go('informes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Informes</button>
+      <div class="sep"></div>
+      <button onclick="startTour()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>Recorrido guiado</button>
+    </nav>
+    <div class="foot">Demo · datos de ejemplo<br>Hecho por Nocodeveloper</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <header class="top">
+      <button class="menu-btn" onclick="toggleSide()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div id="crumb" style="font-size:13px;color:var(--gray)">Pedidos · Escazú, San José</div>
+      <div class="who">
+        <button class="btn sm" id="btn-tour" onclick="startTour()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>Ver el recorrido guiado</button>
+        <span class="av">NR</span><span>Mostrador · Naturema CR</span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== PANEL ===== -->
+      <section class="sec on" id="sec-panel">
+        <div class="page-title">
+          <div><h2>Panel del día</h2><p id="today-label">Resumen de la jornada</p></div>
+          <button class="btn primary" onclick="go('bandeja')">Ver bandeja de pedidos</button>
+        </div>
+        <div class="grid g4" id="tour-panel" style="margin-bottom:14px">
+          <div class="card kpi"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></div><div class="n" id="k-nuevos">0</div><div class="l">Pedidos nuevos sin confirmar</div><div class="t">Entran solos desde web y WhatsApp</div></div>
+          <div class="card kpi"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7l8-4 8 4-8 4-8-4z"/><path d="M4 7v10l8 4 8-4V7"/></svg></div><div class="n" id="k-preparando">0</div><div class="l">En preparación</div><div class="t">Armando el pedido en tienda</div></div>
+          <div class="card kpi"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7 9.5 17.5 4 12"/></svg></div><div class="n" id="k-listos">0</div><div class="l">Listos para enviar</div><div class="t">Empacados, esperando mensajería</div></div>
+          <div class="card kpi"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7z"/></svg></div><div class="n" id="k-entregados">0</div><div class="l">Entregados hoy</div><div class="t">Cerrados y confirmados por el cliente</div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:14px">
+          <div class="card"><div class="hd"><h3>Cobros por verificar</h3><span class="pill s-preparando"><span class="dot"></span>SINPE / transferencia</span></div>
+            <div class="bd"><div class="grid g2">
+              <div><div class="n" style="font-size:24px;font-weight:700" id="k-cobros">0</div><div class="l" style="font-size:12.5px;color:var(--gray)">Pagos por confirmar</div></div>
+              <div><div class="n" style="font-size:24px;font-weight:700" id="k-cobros-monto">₡0</div><div class="l" style="font-size:12.5px;color:var(--gray)">Monto por verificar</div></div>
+            </div>
+            <div class="note" style="margin-top:14px">El comprobante llega por WhatsApp y se marca como verificado al conciliar en la caja. Nada se cobra automáticamente.</div></div>
+          </div>
+          <div class="card"><div class="hd"><h3>Mensajes por responder</h3><span class="pill c-whatsapp"><span class="dot"></span>WhatsApp</span></div>
+            <div class="bd">
+              <div class="n" style="font-size:24px;font-weight:700" id="k-mensajes">0</div>
+              <div class="l" style="font-size:12.5px;color:var(--gray);margin-bottom:14px">Consultas sin responder en el chat</div>
+              <div id="panel-msgs"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="panel-ultimos"><div class="hd"><h3>Últimos pedidos</h3><button class="btn sm" onclick="go('bandeja')">Ver todos</button></div><div class="bd" style="padding:0"><div class="table-wrap"><table id="panel-table"></table></div></div></div>
+      </section>
+
+      <!-- ===== BANDEJA ===== -->
+      <section class="sec" id="sec-bandeja">
+        <div class="page-title">
+          <div><h2>Bandeja de pedidos</h2><p>Todos los pedidos que entraron por la web, por WhatsApp y en tienda física.</p></div>
+        </div>
+        <div class="card" id="tour-bandeja">
+          <div class="bd">
+            <div class="filters">
+              <div class="input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q-bandeja" placeholder="Buscar por cliente, número de pedido o artículo" oninput="renderBandeja()"></div>
+            </div>
+            <div class="chips" id="chips-estado" style="margin-bottom:8px"></div>
+            <div class="chips" id="chips-canal" style="margin-bottom:14px"></div>
+            <div class="table-wrap"><table id="bandeja-table"></table></div>
+          </div>
+        </div>
+        <div id="orden-detalle" style="margin-top:14px"></div>
+      </section>
+
+      <!-- ===== CATALOGO ===== -->
+      <section class="sec" id="sec-catalogo">
+        <div class="page-title">
+          <div><h2>Catálogo e inventario</h2><p>Productos por categoría, precio en colones y stock. El sistema avisa solo cuando el stock baja.</p></div>
+          <button class="btn" onclick="showLowOnly()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Solo stock bajo</button>
+        </div>
+        <div class="card" id="tour-catalogo">
+          <div class="bd">
+            <div class="filters">
+              <div class="input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q-cat" placeholder="Buscar producto" oninput="renderCatalogo()"></div>
+            </div>
+            <div class="chips" id="chips-cat" style="margin-bottom:14px"></div>
+            <div class="table-wrap"><table id="cat-table"></table></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CLIENTES ===== -->
+      <section class="sec" id="sec-clientes">
+        <div class="page-title">
+          <div><h2>Clientes</h2><p>Ficha con historial de compras, zona y notas. Teléfonos de ejemplo.</p></div>
+        </div>
+        <div class="card">
+          <div class="bd">
+            <div class="input" style="margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q-cli" placeholder="Buscar cliente por nombre o zona" oninput="renderClientes()"></div>
+            <div class="table-wrap"><table id="cli-table"></table></div>
+          </div>
+        </div>
+        <div id="cli-detalle" style="margin-top:14px"></div>
+      </section>
+
+      <!-- ===== ENVIOS ===== -->
+      <section class="sec" id="sec-envios">
+        <div class="page-title">
+          <div><h2>Envíos</h2><p>Pedidos por entregar, por zona y tipo: retiro en tienda o mensajería.</p></div>
+        </div>
+        <div class="card" id="tour-envios"><div class="bd">
+          <div class="grid g4" id="envios-kpis" style="margin-bottom:16px"></div>
+          <div class="table-wrap"><table id="envios-table"></table></div>
+        </div></div>
+      </section>
+
+      <!-- ===== CAJA ===== -->
+      <section class="sec" id="sec-caja">
+        <div class="page-title">
+          <div><h2>Caja del día</h2><p id="caja-fecha">Ventas cobradas hoy</p></div>
+        </div>
+        <div class="card" id="tour-caja"><div class="bd">
+          <div class="grid g4" id="caja-kpis" style="margin-bottom:18px"></div>
+          <div class="table-wrap"><table id="caja-table"></table></div>
+          <div class="note" style="margin-top:14px">No se muestran números de cuenta ni datos bancarios. El total del día suma los pedidos cobrados hoy.</div>
+        </div></div>
+      </section>
+
+      <!-- ===== INFORMES ===== -->
+      <section class="sec" id="sec-informes">
+        <div class="page-title">
+          <div><h2>Informes</h2><p>Ventas, productos, canales y ticket promedio de los últimos días.</p></div>
+        </div>
+        <div class="grid g2" id="tour-informes">
+          <div class="card"><div class="hd"><h3>Ventas por día · última semana</h3></div><div class="bd"><div class="chart" id="ch-ventas"></div></div></div>
+          <div class="card"><div class="hd"><h3>Productos más vendidos</h3></div><div class="bd"><div id="ch-productos"></div></div></div>
+          <div class="card"><div class="hd"><h3>Ventas por canal</h3></div><div class="bd"><div id="ch-canales"></div></div></div>
+          <div class="card"><div class="hd"><h3>Ticket promedio</h3></div><div class="bd"><div id="ch-ticket"></div></div></div>
+        </div>
+      </section>
+
+      <div class="foot-note">Demo de referencia hecho por Nocodeveloper. Los datos son de ejemplo.</div>
+    </div>
+  </div>
+</div>
+
+<div class="tour-dim" id="tour-dim"></div>
+<div class="tour-spot" id="tour-spot" style="display:none"></div>
+<div class="tour-card" id="tour-card" style="display:none"></div>
+<button class="tour-close" id="tour-close" style="display:none" onclick="endTour()">Salir</button>
+<div class="modal" id="modal"><div class="box" id="modal-box"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= FECHA (relativa a hoy, UTC) ================= */
+function iso(d){return d.toISOString().slice(0,10);}
+function daysAgo(n){var d=new Date();d.setUTCDate(d.getUTCDate()-n);return iso(d);}
+function daysAhead(n){return daysAgo(-n);}
+const TODAY=iso(new Date());
+const DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function prettyDate(isoStr){
+  var d=new Date(isoStr+'T12:00:00Z');
+  if(isoStr===TODAY)return 'Hoy';
+  if(isoStr===daysAgo(1))return 'Ayer';
+  return DIAS[d.getUTCDay()]+' '+d.getUTCDate()+' de '+MESES[d.getUTCMonth()];
+}
+function shortDay(isoStr){var d=new Date(isoStr+'T12:00:00Z');return DIAS[d.getUTCDay()].slice(0,3)+' '+d.getUTCDate();}
+function crc(n){return '₡'+Math.round(n).toLocaleString('de-DE');}
+
+/* ================= DATOS DE EJEMPLO ================= */
+const WHATSAPP='+506 8447 3233';
+const ZONAS=['San José','Escazú','Heredia','Cartago','Fuera del GAM'];
+const LOW_STOCK=3;
+
+const CATEGORIAS=[{k:'mates',t:'Mates'},{k:'bombillas',t:'Bombillas'},{k:'yerbas',t:'Yerbas'},{k:'termos',t:'Termos'},{k:'accesorios',t:'Accesorios'}];
+const CAT_LABEL=Object.fromEntries(CATEGORIAS.map(c=>[c.k,c.t]));
+
+const PRODUCTOS=[
+  {id:'p1',nombre:'Yerba Abreu Café 1 kg',cat:'yerbas',precio:28000,stock:12},
+  {id:'p2',nombre:'Yerba Abreu Negro 1 kg',cat:'yerbas',precio:28000,stock:9},
+  {id:'p3',nombre:'Yerba Agüero 1 kg',cat:'yerbas',precio:8000,stock:24},
+  {id:'p4',nombre:'Yerba Aimar 1 kg',cat:'yerbas',precio:29000,stock:2},
+  {id:'p5',nombre:'Alfajor Dou NT',cat:'accesorios',precio:2500,stock:40},
+  {id:'p6',nombre:'Alfajor Duo blanco',cat:'accesorios',precio:2500,stock:3},
+  {id:'p7',nombre:'Mate camionero de calabaza',cat:'mates',precio:22000,stock:7},
+  {id:'p8',nombre:'Mate imperial forrado en cuero',cat:'mates',precio:35000,stock:4},
+  {id:'p9',nombre:'Mate de vidrio con funda de cuero',cat:'mates',precio:18000,stock:6},
+  {id:'p10',nombre:'Bombilla de acero inoxidable curva',cat:'bombillas',precio:6500,stock:18},
+  {id:'p11',nombre:'Bombilla de alpaca con filtro desmontable',cat:'bombillas',precio:12000,stock:2},
+  {id:'p12',nombre:'Bombilla pico de loro de plata',cat:'bombillas',precio:26000,stock:5},
+  {id:'p13',nombre:'Termo Stanley 1 L',cat:'termos',precio:42000,stock:6},
+  {id:'p14',nombre:'Termo de acero 1,2 L',cat:'termos',precio:28000,stock:10},
+  {id:'p15',nombre:'Termo cebador media manija',cat:'termos',precio:22000,stock:8}
+];
+const PROD_BY_ID=Object.fromEntries(PRODUCTOS.map(p=>[p.id,p]));
+
+const CLIENTES=[
+  {id:'c1',nombre:'Ana Mora Solano',zona:'Escazú',tel:'+506 8811 2233',notas:'Cliente frecuente de yerbas. Prefiere entrega los viernes por la tarde.'},
+  {id:'c2',nombre:'Carlos Jiménez Rojas',zona:'San José',tel:'+506 8722 4411',notas:'Compró su primer set de mate en 2019. Le gustan los mates de calabaza.'},
+  {id:'c3',nombre:'María Fernández Vega',zona:'Heredia',tel:'+506 8633 9087',notas:'Pide alfajores por caja para compartir en la oficina.'},
+  {id:'c4',nombre:'José Ramírez Cordero',zona:'Cartago',tel:'+506 8544 7712',notas:'Prefiere transferencia bancaria. Retira en tienda cuando puede.'},
+  {id:'c5',nombre:'Laura Quesada Mora',zona:'Escazú',tel:'+506 8455 6600',notas:'Vecina de la tienda. Consulta por novedades de bombillas.'},
+  {id:'c6',nombre:'Sofía Rojas Alfaro',zona:'Cartago',tel:'+506 8366 1120',notas:'Regala mates importados. Pide envoltura de regalo.'},
+  {id:'c7',nombre:'Andrés Vega Campos',zona:'Fuera del GAM',tel:'+506 8277 3345',notas:'Pedidos grandes fuera del GAM; confirma la mensajería por WhatsApp.'},
+  {id:'c8',nombre:'Diego Vargas Salas',zona:'San José',tel:'+506 8188 5566',notas:'Cliente nuevo. Escribió por primera vez esta semana.'}
+];
+const CLI_BY_ID=Object.fromEntries(CLIENTES.map(c=>[c.id,c]));
+
+const CANALES=[{k:'web',t:'Web',cls:'c-web'},{k:'whatsapp',t:'WhatsApp',cls:'c-whatsapp'},{k:'tienda',t:'Tienda física',cls:'c-tienda'}];
+const CANAL_LABEL=Object.fromEntries(CANALES.map(c=>[c.k,c.t]));
+
+const ESTADOS=[{k:'nuevo',t:'Nuevo'},{k:'confirmado',t:'Confirmado'},{k:'preparando',t:'En preparación'},{k:'enviado',t:'Enviado'},{k:'entregado',t:'Entregado'},{k:'cancelado',t:'Cancelado'}];
+const ESTADO_LABEL=Object.fromEntries(ESTADOS.map(e=>[e.k,e.t]));
+const FLOW=['nuevo','confirmado','preparando','enviado','entregado'];
+const METODOS={sinpe:'SINPE Móvil',transferencia:'Transferencia',efectivo:'Efectivo contra entrega'};
+
+/* helpers de fecha de pedido */
+const G0=0,G1=1,G2=2,G3=3,G4=4,G5=5,G6=6;
+
+const PEDIDOS=[
+  {id:'P-1042',canal:'whatsapp',cliente:'c1',items:[['p1',1],['p5',4]],estado:'nuevo',listo:false,creado:daysAgo(0),
+   pago:{metodo:'sinpe',estado:'por_verificar'},cobrado:false,fechaCobro:null,tipo:'mensajeria',guia:{estado:'por_preparar',codigo:''},mensajes:3,
+   historial:[['nuevo',daysAgo(0)+' 09:12']],nota:'Consulta por yerba Abreu Café y alfajores. Envió comprobante de SINPE por verificar.'},
+  {id:'P-1041',canal:'web',cliente:'c2',items:[['p7',1],['p10',2],['p13',1]],estado:'nuevo',listo:false,creado:daysAgo(0),
+   pago:{metodo:'transferencia',estado:'por_verificar'},cobrado:false,fechaCobro:null,tipo:'mensajeria',guia:{estado:'por_preparar',codigo:''},mensajes:1,
+   historial:[['nuevo',daysAgo(0)+' 08:40']],nota:'Pedido web: mate camionero + bombillas + termo Stanley.'},
+  {id:'P-1040',canal:'whatsapp',cliente:'c3',items:[['p4',2],['p6',3]],estado:'confirmado',listo:false,creado:daysAgo(1),
+   pago:{metodo:'sinpe',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(0),tipo:'mensajeria',guia:{estado:'en_ruta',codigo:'CR-5823'},mensajes:0,
+   historial:[['nuevo',daysAgo(1)+' 15:20'],['confirmado',daysAgo(1)+' 15:48']],nota:'Pago verificado. Sale por mensajería a Heredia.'},
+  {id:'P-1039',canal:'web',cliente:'c5',items:[['p8',1],['p12',1]],estado:'preparando',listo:false,creado:daysAgo(1),
+   pago:{metodo:'transferencia',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(0),tipo:'retiro',guia:{estado:'no_aplica',codigo:''},mensajes:0,
+   historial:[['nuevo',daysAgo(1)+' 11:10'],['confirmado',daysAgo(1)+' 11:35'],['preparando',daysAgo(0)+' 09:05']],nota:'Mate imperial + bombilla pico de loro. Retira en tienda el sábado.'},
+  {id:'P-1038',canal:'tienda',cliente:'c6',items:[['p3',3],['p9',1]],estado:'preparando',listo:true,creado:daysAgo(1),
+   pago:{metodo:'efectivo',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(0),tipo:'retiro',guia:{estado:'no_aplica',codigo:''},mensajes:0,
+   historial:[['nuevo',daysAgo(1)+' 10:00'],['confirmado',daysAgo(1)+' 10:05'],['preparando',daysAgo(1)+' 10:20']],nota:'Compra en mostrador. Empacado para retiro, con envoltura de regalo.'},
+  {id:'P-1037',canal:'whatsapp',cliente:'c4',items:[['p1',1],['p2',1],['p14',1]],estado:'preparando',listo:true,creado:daysAgo(1),
+   pago:{metodo:'sinpe',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(1),tipo:'mensajeria',guia:{estado:'por_preparar',codigo:''},mensajes:0,
+   historial:[['nuevo',daysAgo(1)+' 09:00'],['confirmado',daysAgo(1)+' 09:30'],['preparando',daysAgo(0)+' 08:30']],nota:'Listo para despachar a Cartago por mensajería.'},
+  {id:'P-1036',canal:'whatsapp',cliente:'c4',items:[['p15',1],['p5',2]],estado:'enviado',listo:true,creado:daysAgo(2),
+   pago:{metodo:'sinpe',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(2),tipo:'mensajeria',guia:{estado:'en_ruta',codigo:'CR-5790'},mensajes:0,
+   historial:[['nuevo',daysAgo(2)+' 14:00'],['confirmado',daysAgo(2)+' 14:15'],['preparando',daysAgo(2)+' 16:40'],['enviado',daysAgo(1)+' 09:10']],nota:'En ruta a Cartago. Guía CR-5790.'},
+  {id:'P-1035',canal:'web',cliente:'c7',items:[['p11',2],['p15',1]],estado:'enviado',listo:true,creado:daysAgo(2),
+   pago:{metodo:'transferencia',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(2),tipo:'mensajeria',guia:{estado:'en_ruta',codigo:'CR-5788'},mensajes:0,
+   historial:[['nuevo',daysAgo(2)+' 12:20'],['confirmado',daysAgo(2)+' 12:40'],['preparando',daysAgo(2)+' 17:00'],['enviado',daysAgo(1)+' 10:00']],nota:'Fuera del GAM. En ruta con guía CR-5788.'},
+  {id:'P-1034',canal:'tienda',cliente:'c5',items:[['p5',6]],estado:'entregado',listo:true,creado:daysAgo(2),
+   pago:{metodo:'efectivo',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(0),entregadoEn:daysAgo(0),tipo:'retiro',guia:{estado:'no_aplica',codigo:''},mensajes:0,
+   historial:[['nuevo',daysAgo(2)+' 16:00'],['confirmado',daysAgo(2)+' 16:05'],['preparando',daysAgo(2)+' 16:20'],['enviado',daysAgo(1)+' 11:00'],['entregado',daysAgo(0)+' 12:30']],nota:'6 alfajores Dou NT. Entregado hoy en tienda.'},
+  {id:'P-1033',canal:'whatsapp',cliente:'c1',items:[['p13',1]],estado:'entregado',listo:true,creado:daysAgo(3),
+   pago:{metodo:'sinpe',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(0),entregadoEn:daysAgo(0),tipo:'mensajeria',guia:{estado:'entregado',codigo:'CR-5761'},mensajes:0,
+   historial:[['nuevo',daysAgo(3)+' 10:00'],['confirmado',daysAgo(3)+' 10:20'],['preparando',daysAgo(3)+' 13:00'],['enviado',daysAgo(2)+' 09:00'],['entregado',daysAgo(0)+' 11:15']],nota:'Termo Stanley entregado hoy en Escazú.'},
+  {id:'P-1032',canal:'web',cliente:'c2',items:[['p9',2]],estado:'entregado',listo:true,creado:daysAgo(3),
+   pago:{metodo:'transferencia',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(3),entregadoEn:daysAgo(1),tipo:'mensajeria',guia:{estado:'entregado',codigo:'CR-5750'},mensajes:0,
+   historial:[['nuevo',daysAgo(3)+' 09:30'],['confirmado',daysAgo(3)+' 09:50'],['preparando',daysAgo(3)+' 14:00'],['enviado',daysAgo(2)+' 08:30'],['entregado',daysAgo(1)+' 15:40']],nota:'Entregado ayer en San José.'},
+  {id:'P-1031',canal:'whatsapp',cliente:'c3',items:[['p4',1],['p5',2]],estado:'cancelado',listo:false,creado:daysAgo(4),
+   pago:{metodo:'sinpe',estado:'por_verificar'},cobrado:false,fechaCobro:null,tipo:'mensajeria',guia:{estado:'no_aplica',codigo:''},mensajes:1,
+   historial:[['nuevo',daysAgo(4)+' 11:00'],['cancelado',daysAgo(4)+' 18:20']],nota:'El cliente canceló: pidió la yerba equivocada.'},
+  {id:'P-1030',canal:'tienda',cliente:'c8',items:[['p3',1],['p10',1]],estado:'entregado',listo:true,creado:daysAgo(1),
+   pago:{metodo:'efectivo',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(0),entregadoEn:daysAgo(0),tipo:'retiro',guia:{estado:'no_aplica',codigo:''},mensajes:0,
+   historial:[['nuevo',daysAgo(1)+' 17:00'],['confirmado',daysAgo(1)+' 17:03'],['preparando',daysAgo(1)+' 17:10'],['entregado',daysAgo(0)+' 10:00']],nota:'Compra en mostrador. Entregado hoy mismo.'},
+  {id:'P-1029',canal:'web',cliente:'c6',items:[['p6',4],['p5',2]],estado:'preparando',listo:true,creado:daysAgo(1),
+   pago:{metodo:'transferencia',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(1),tipo:'mensajeria',guia:{estado:'por_preparar',codigo:''},mensajes:0,
+   historial:[['nuevo',daysAgo(1)+' 13:10'],['confirmado',daysAgo(1)+' 13:40'],['preparando',daysAgo(0)+' 09:40']],nota:'Alfajores para regalo. Listo para despachar.'},
+  {id:'P-1028',canal:'whatsapp',cliente:'c2',items:[['p12',1],['p11',1],['p14',1]],estado:'enviado',listo:true,creado:daysAgo(2),
+   pago:{metodo:'sinpe',estado:'verificado'},cobrado:true,fechaCobro:daysAgo(2),tipo:'retiro',guia:{estado:'no_aplica',codigo:''},mensajes:0,
+   historial:[['nuevo',daysAgo(2)+' 10:10'],['confirmado',daysAgo(2)+' 10:30'],['preparando',daysAgo(2)+' 15:00'],['enviado',daysAgo(1)+' 08:00']],nota:'Retiro en tienda programado para mañana.'},
+  {id:'P-1027',canal:'web',cliente:'c5',items:[['p8',1]],estado:'confirmado',listo:false,creado:daysAgo(0),
+   pago:{metodo:'transferencia',estado:'por_verificar'},cobrado:false,fechaCobro:null,tipo:'mensajeria',guia:{estado:'por_preparar',codigo:''},mensajes:1,
+   historial:[['nuevo',daysAgo(0)+' 07:55'],['confirmado',daysAgo(0)+' 08:10']],nota:'Pendiente verificar transferencia del mate imperial.'},
+  {id:'P-1026',canal:'whatsapp',cliente:'c8',items:[['p15',1],['p5',2]],estado:'nuevo',listo:false,creado:daysAgo(0),
+   pago:{metodo:'sinpe',estado:'por_verificar'},cobrado:false,fechaCobro:null,tipo:'mensajeria',guia:{estado:'por_preparar',codigo:''},mensajes:2,
+   historial:[['nuevo',daysAgo(0)+' 12:05']],nota:'Cliente nuevo de San José. Pidió un termo cebador y alfajores.'}
+];
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600);}
+function totalDe(p){return p.items.reduce((s,[pid,q])=>s+PROD_BY_ID[pid].precio*q,0);}
+function pillEstado(e){return '<span class="pill s-'+e+'"><span class="dot"></span>'+ESTADO_LABEL[e]+'</span>';}
+function pillCanal(c){var m=CANALES.find(x=>x.k===c);return '<span class="pill '+m.cls+'"><span class="dot"></span>'+m.t+'</span>';}
+function initials(n){return n.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+
+/* ================= NAVEGACIÓN ================= */
+let currentSec='panel';
+function go(sec){
+  currentSec=sec;
+  $$('.sec').forEach(s=>s.classList.toggle('on',s.id==='sec-'+sec));
+  $$('#nav button[data-sec]').forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
+  $('#crumb').textContent={panel:'Pedidos · Escazú, San José',bandeja:'Bandeja de pedidos',catalogo:'Catálogo e inventario',clientes:'Clientes',envios:'Envíos',caja:'Caja del día',informes:'Informes'}[sec]||'';
+  window.scrollTo(0,0);
+  closeSide();
+  if(sec==='bandeja'){var d=$('#orden-detalle');d.innerHTML='';}
+  if(sec==='clientes'){var c=$('#cli-detalle');c.innerHTML='';}
+  if(tour.active){ if(TOUR_STEPS[tour.i].sec!==sec){ endTour(true); toast('Recorrido cerrado: cambió de sección.'); } }
+}
+function toggleSide(){$('#side').classList.toggle('open');$('#scrim').classList.toggle('on');}
+function closeSide(){$('#side').classList.remove('open');$('#scrim').classList.remove('on');}
+function enterApp(){$('#welcome').style.display='none';}
+function closeModal(){$('#modal').classList.remove('on');}
+
+/* ================= PANEL ================= */
+function renderPanel(){
+  const nuevos=PEDIDOS.filter(p=>p.estado==='nuevo').length;
+  const preparando=PEDIDOS.filter(p=>p.estado==='preparando'&&!p.listo).length;
+  const listos=PEDIDOS.filter(p=>p.estado==='preparando'&&p.listo).length;
+  const entregadosHoy=PEDIDOS.filter(p=>p.estado==='entregado'&&p.entregadoEn===TODAY).length;
+  const porVerificar=PEDIDOS.filter(p=>p.estado!=='cancelado'&&p.pago.estado==='por_verificar');
+  const montoVerif=porVerificar.reduce((s,p)=>s+totalDe(p),0);
+  const mensajes=PEDIDOS.filter(p=>p.estado!=='cancelado').reduce((s,p)=>s+(p.mensajes||0),0);
+  $('#k-nuevos').textContent=nuevos;
+  $('#k-preparando').textContent=preparando;
+  $('#k-listos').textContent=listos;
+  $('#k-entregados').textContent=entregadosHoy;
+  $('#k-cobros').textContent=porVerificar.length;
+  $('#k-cobros-monto').textContent=crc(montoVerif);
+  $('#k-mensajes').textContent=mensajes;
+  document.documentElement.dataset.kNuevos=nuevos;
+  document.documentElement.dataset.kPreparando=preparando;
+  document.documentElement.dataset.kListos=listos;
+  document.documentElement.dataset.kEntregados=entregadosHoy;
+  // mensajes por responder (detalle)
+  const conMsg=PEDIDOS.filter(p=>p.estado!=='cancelado'&&(p.mensajes||0)>0)
+    .sort((a,b)=>b.mensajes-a.mensajes).slice(0,3);
+  $('#panel-msgs').innerHTML=conMsg.map(p=>'<div class="info-row"><span class="k">'+CLI_BY_ID[p.cliente].nombre+' · #'+p.id+'</span><span class="v">'+p.mensajes+' sin responder</span></div>').join('')||'<div class="note">Sin mensajes pendientes.</div>';
+  // últimos pedidos
+  const ult=PEDIDOS.slice().sort((a,b)=>b.id.localeCompare(a.id)).slice(0,6);
+  $('#panel-table').innerHTML='<thead><tr><th>Pedido</th><th>Cliente</th><th>Canal</th><th>Estado</th><th class="num">Total</th></tr></thead><tbody>'+
+    ult.map(p=>'<tr onclick="go(\'bandeja\');setTimeout(function(){openOrden(\''+p.id+'\')},60)"><td><b>#'+p.id+'</b></td><td>'+CLI_BY_ID[p.cliente].nombre+'</td><td>'+pillCanal(p.canal)+'</td><td>'+pillEstado(p.estado)+'</td><td class="num">'+crc(totalDe(p))+'</td></tr>').join('')+'</tbody>';
+  const d=new Date(TODAY+'T12:00:00Z');
+  $('#today-label').textContent=DIAS[d.getUTCDay()]+' '+d.getUTCDate()+' de '+MESES[d.getUTCMonth()]+' · '+PEDIDOS.filter(p=>p.creado===TODAY).length+' pedidos nuevos hoy';
+  $('#caja-fecha').textContent='Ventas cobradas · '+prettyDate(TODAY);
+}
+
+/* ================= BANDEJA ================= */
+let filtroEstado='todos', filtroCanal='todos';
+function renderChips(){
+  const est=[{k:'todos',t:'Todos'}].concat(ESTADOS);
+  $('#chips-estado').innerHTML=est.map(e=>'<button class="chip '+(filtroEstado===e.k?'active':'')+'" onclick="setEstado(\''+e.k+'\')">'+(e.t)+' ('+(e.k==='todos'?PEDIDOS.length:PEDIDOS.filter(p=>p.estado===e.k).length)+')</button>').join('');
+  const can=[{k:'todos',t:'Todos los canales'}].concat(CANALES);
+  $('#chips-canal').innerHTML=can.map(c=>'<button class="chip '+(filtroCanal===c.k?'active':'')+'" onclick="setCanal(\''+c.k+'\')">'+(c.t)+' ('+(c.k==='todos'?PEDIDOS.length:PEDIDOS.filter(x=>x.canal===c.k).length)+')</button>').join('');
+}
+function setEstado(k){filtroEstado=k;renderBandeja();}
+function setCanal(k){filtroCanal=k;renderBandeja();}
+function pedidoFiltrado(p){
+  if(filtroEstado!=='todos'&&p.estado!==filtroEstado)return false;
+  if(filtroCanal!=='todos'&&p.canal!==filtroCanal)return false;
+  return true;
+}
+function renderBandeja(){
+  renderChips();
+  const q=($('#q-bandeja').value||'').toLowerCase();
+  let list=PEDIDOS.filter(pedidoFiltrado);
+  if(q){list=list.filter(p=>{
+    const itemsTxt=p.items.map(([pid])=>PROD_BY_ID[pid].nombre).join(' ').toLowerCase();
+    return p.id.toLowerCase().includes(q)||CLI_BY_ID[p.cliente].nombre.toLowerCase().includes(q)||itemsTxt.includes(q);
+  });}
+  const rows=list.map(p=>{
+    const itemsShort=p.items.map(([pid,n])=>n+'× '+PROD_BY_ID[pid].nombre).join(' · ');
+    return '<tr onclick="openOrden(\''+p.id+'\')"><td><b>#'+p.id+'</b><div style="font-size:11.5px;color:var(--gray)">'+prettyDate(p.creado)+'</div></td>'+
+      '<td>'+CLI_BY_ID[p.cliente].nombre+'<div style="font-size:11.5px;color:var(--gray)">'+CLI_BY_ID[p.cliente].zona+'</div></td>'+
+      '<td>'+pillCanal(p.canal)+'</td>'+
+      '<td>'+pillEstado(p.estado)+(p.listo?' <span class="pill s-entregado">Listo</span>':'')+(p.pago.estado==='por_verificar'?' <span class="pill s-preparando">Pago por verificar</span>':'')+'</td>'+
+      '<td class="arts" title="'+itemsShort.replace(/"/g,'')+'">'+itemsShort+'</td>'+
+      '<td class="num"><b>'+crc(totalDe(p))+'</b></td></tr>';
+  }).join('');
+  $('#bandeja-table').innerHTML='<thead><tr><th>Pedido</th><th>Cliente</th><th>Canal</th><th>Estado</th><th>Artículos</th><th class="num">Total</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" class="note" style="border:0">No hay pedidos con ese filtro.</td></tr>')+'</tbody>';
+}
+
+function openOrden(id){
+  const p=PEDIDOS.find(x=>x.id===id);if(!p)return;
+  const cli=CLI_BY_ID[p.cliente];
+  const idx=FLOW.indexOf(p.estado);
+  const nextEstado=(idx>=0&&idx<FLOW.length-1)?FLOW[idx+1]:null;
+  const items=p.items.map(([pid,n])=>{const pr=PROD_BY_ID[pid];return '<div class="info-row"><span class="k">'+n+'× '+pr.nombre+'<div style="font-size:11.5px">'+crc(pr.precio)+' c/u</div></span><span class="v">'+crc(pr.precio*n)+'</span></div>';}).join('');
+  const acc=[];
+  if(nextEstado)acc.push('<button class="btn primary" onclick="avanzar(\''+p.id+'\')">Avanzar a '+ESTADO_LABEL[nextEstado]+'</button>');
+  if(p.estado==='preparando'&&!p.listo)acc.push('<button class="btn amber" onclick="marcarListo(\''+p.id+'\')">Marcar listo para enviar</button>');
+  if(p.pago.estado==='por_verificar')acc.push('<button class="btn" onclick="verificarPago(\''+p.id+'\')">Verificar pago</button>');
+  acc.push('<button class="btn" onclick="waModal(\''+p.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/></svg>Enviar comprobante/guía por WhatsApp</button>');
+  if(p.estado!=='cancelado'&&p.estado!=='entregado')acc.push('<button class="btn ghost" onclick="cancelar(\''+p.id+'\')" style="color:#a13b3b">Cancelar pedido</button>');
+  const hist=p.historial.map(h=>'<li><div class="tt">'+ESTADO_LABEL[h[0]]+'</div><div class="dd">'+h[1].replace(TODAY,'Hoy').replace(daysAgo(1),'Ayer')+'</div></li>').join('');
+  $('#orden-detalle').innerHTML='<div class="card"><div class="hd"><h3>Pedido #'+p.id+' '+pillEstado(p.estado)+' '+pillCanal(p.canal)+'</h3><button class="btn sm" onclick="document.getElementById(\'orden-detalle\').innerHTML=\'\'">Cerrar</button></div><div class="bd">'+
+    '<div class="grid g2"><div>'+
+      '<h4 style="font-size:13px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Detalle del pedido</h4>'+
+      '<div class="info-row"><span class="k">Cliente</span><span class="v">'+cli.nombre+'</span></div>'+
+      '<div class="info-row"><span class="k">Teléfono</span><span class="v">'+cli.tel+'</span></div>'+
+      '<div class="info-row"><span class="k">Zona</span><span class="v">'+cli.zona+'</span></div>'+
+      '<div class="info-row"><span class="k">Origen del canal</span><span class="v">'+CANAL_LABEL[p.canal]+'</span></div>'+
+      '<div class="info-row"><span class="k">Entrega</span><span class="v">'+(p.tipo==='retiro'?'Retiro en tienda':'Mensajería · '+cli.zona)+'</span></div>'+
+      '<div class="info-row"><span class="k">Pago</span><span class="v">'+METODOS[p.pago.metodo]+' · '+(p.pago.estado==='verificado'?'verificado':'por verificar')+'</span></div>'+
+      '<div class="info-row"><span class="k">Creado</span><span class="v">'+prettyDate(p.creado)+'</span></div>'+
+      '<div class="note" style="margin-top:12px">'+p.nota+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">'+acc.join('')+'</div>'+
+    '</div><div>'+
+      '<h4 style="font-size:13px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Artículos · Total '+crc(totalDe(p))+'</h4>'+
+      items+
+      '<h4 style="font-size:13px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px">Historial de estados</h4>'+
+      '<ul class="timeline">'+hist+'</ul>'+
+    '</div></div></div></div>';
+  $('#orden-detalle').scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(tour.active&&TOUR_STEPS[tour.i].target==='#orden-detalle'){placeStep();}
+}
+function avanzar(id){
+  const p=PEDIDOS.find(x=>x.id===id);const idx=FLOW.indexOf(p.estado);
+  if(idx<0||idx>=FLOW.length-1)return;
+  const next=FLOW[idx+1];
+  p.estado=next;
+  p.historial.push([next,TODAY+' 10:30']);
+  if(next==='entregado')p.entregadoEn=TODAY;
+  if(next==='enviado'&&p.tipo==='mensajeria'&&!p.guia.codigo){p.guia.estado='en_ruta';p.guia.codigo='CR-'+(5800+Math.floor(Math.random()*90));}
+  renderPanel();renderBandeja();renderEnvios();renderCaja();renderInformes();openOrden(id);
+  toast('Pedido #'+id+' → '+ESTADO_LABEL[next]);
+}
+function marcarListo(id){const p=PEDIDOS.find(x=>x.id===id);p.listo=true;renderPanel();renderBandeja();renderEnvios();openOrden(id);toast('Pedido #'+id+' marcado como listo para enviar.');}
+function verificarPago(id){const p=PEDIDOS.find(x=>x.id===id);p.pago.estado='verificado';p.cobrado=true;p.fechaCobro=TODAY;renderPanel();renderBandeja();renderCaja();renderInformes();openOrden(id);toast('Pago del pedido #'+id+' verificado y sumado a la caja.');}
+function cancelar(id){const p=PEDIDOS.find(x=>x.id===id);p.estado='cancelado';p.listo=false;p.historial.push(['cancelado',TODAY+' 10:35']);renderPanel();renderBandeja();renderEnvios();renderCaja();renderInformes();openOrden(id);toast('Pedido #'+id+' cancelado.');}
+
+/* ================= WHATSAPP (maqueta) ================= */
+function waModal(id){
+  const p=PEDIDOS.find(x=>x.id===id);const cli=CLI_BY_ID[p.cliente];
+  const items=p.items.map(([pid,n])=>n+'× '+PROD_BY_ID[pid].nombre).join(', ');
+  var msg='Hola '+cli.nombre.split(' ')[0]+', le escribe Naturema CR (La Matería de Escazú).\n\n'+
+    'Su pedido #'+p.id+' está '+ESTADO_LABEL[p.estado].toLowerCase()+'. Detalle: '+items+'. Total: '+crc(totalDe(p))+'.'+
+    (p.tipo==='retiro'?'\n\nEntrega: retiro en tienda (Escazú, San José).':'')+
+    (p.tipo==='mensajeria'&&p.guia.codigo?'\n\nGuía de mensajería: '+p.guia.codigo+' ('+cli.zona+').':'')+
+    (p.pago.estado==='por_verificar'?'\n\nVimos su comprobante de '+METODOS[p.pago.metodo]+' y lo estamos confirmando.':'')+
+    '\n\nCualquier cosa, aquí estamos. ¡Gracias!';
+  $('#modal-box').innerHTML='<h3 style="font-size:17px;color:var(--navy)">Aviso por WhatsApp al '+WHATSAPP+'</h3>'+
+    '<p style="color:var(--gray);font-size:13px;margin:6px 0 14px">Maqueta del mensaje que enviaría el sistema. En esta demo no se envía nada.</p>'+
+    '<div class="wa"><div class="phone"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" style="width:16px;height:16px"><path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/></svg>Naturema CR · '+WHATSAPP+'</div>'+
+    '<div class="thread"><div class="msg out">'+msg.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'<div class="tm">10:30</div></div></div></div>'+
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn" onclick="closeModal()">Cerrar</button><button class="btn primary" onclick="closeModal();toast(\'Maqueta: no se envía nada en esta demo.\')">Copiar y enviar</button></div>';
+  $('#modal').classList.add('on');
+}
+
+/* ================= CATÁLOGO ================= */
+let filtroCat='todas', soloBajo=false;
+function showLowOnly(){soloBajo=!soloBajo;renderCatalogo();toast(soloBajo?'Mostrando solo productos con stock bajo.':'Mostrando todo el catálogo.');}
+function renderCatalogo(){
+  const cats=[{k:'todas',t:'Todas'}].concat(CATEGORIAS);
+  $('#chips-cat').innerHTML=cats.map(c=>'<button class="chip '+(filtroCat===c.k?'active':'')+'" onclick="setCat(\''+c.k+'\')">'+(c.t)+' ('+(c.k==='todas'?PRODUCTOS.length:PRODUCTOS.filter(p=>p.cat===c.k).length)+')</button>').join('');
+  const q=($('#q-cat').value||'').toLowerCase();
+  let list=PRODUCTOS.filter(p=>filtroCat==='todas'||p.cat===filtroCat);
+  if(soloBajo)list=list.filter(p=>p.stock<=LOW_STOCK);
+  if(q)list=list.filter(p=>p.nombre.toLowerCase().includes(q));
+  const rows=list.map(p=>{
+    const bajo=p.stock<=LOW_STOCK;
+    return '<tr><td class="wrap"><b>'+p.nombre+'</b>'+ (bajo?' <span class="pill low">Stock bajo</span>':'') +'<div style="font-size:11.5px;color:var(--gray)">'+CAT_LABEL[p.cat]+'</div></td>'+
+      '<td class="num">'+crc(p.precio)+'</td>'+
+      '<td><input type="number" min="0" value="'+p.stock+'" id="stk-'+p.id+'" class="f" style="width:78px;padding:5px 8px" onchange="setStock(\''+p.id+'\',this.value)"></td>'+
+      '<td>'+(bajo?'<span class="pill low">'+p.stock+' en stock · stock bajo</span>':'<span class="pill s-entregado">'+p.stock+' en stock</span>')+'</td></tr>';
+  }).join('');
+  $('#cat-table').innerHTML='<thead><tr><th>Producto</th><th class="num">Precio</th><th>Stock</th><th>Aviso</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" class="note" style="border:0">Sin productos.</td></tr>')+'</tbody>';
+}
+function setCat(k){filtroCat=k;renderCatalogo();}
+function setStock(id,v){const p=PROD_BY_ID[id];const n=Math.max(0,parseInt(v||'0',10));const bajo=n<=LOW_STOCK;p.stock=n;renderCatalogo();toast(p.nombre+': stock actualizado a '+n+(bajo?' · aviso de stock bajo.':'.'));}
+
+/* ================= CLIENTES ================= */
+function renderClientes(){
+  const q=($('#q-cli').value||'').toLowerCase();
+  let list=CLIENTES.slice();
+  if(q)list=list.filter(c=>c.nombre.toLowerCase().includes(q)||c.zona.toLowerCase().includes(q));
+  const rows=list.map(c=>{
+    const compras=PEDIDOS.filter(p=>p.cliente===c.id);
+    const gastado=compras.filter(p=>p.estado!=='cancelado').reduce((s,p)=>s+totalDe(p),0);
+    return '<tr onclick="openCliente(\''+c.id+'\')"><td><b>'+c.nombre+'</b></td><td>'+c.zona+'</td><td>'+c.tel+'</td><td class="num">'+compras.length+'</td><td class="num">'+crc(gastado)+'</td></tr>';
+  }).join('');
+  $('#cli-table').innerHTML='<thead><tr><th>Cliente</th><th>Zona</th><th>Teléfono</th><th class="num">Compras</th><th class="num">Total histórico</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="note" style="border:0">Sin clientes.</td></tr>')+'</tbody>';
+}
+function openCliente(id){
+  const c=CLI_BY_ID[id];
+  const compras=PEDIDOS.filter(p=>p.cliente===id).sort((a,b)=>b.id.localeCompare(a.id));
+  const gastado=compras.filter(p=>p.estado!=='cancelado').reduce((s,p)=>s+totalDe(p),0);
+  const hist=compras.map(p=>'<div class="info-row"><span class="k"><b>#'+p.id+'</b> · '+prettyDate(p.creado)+' '+pillCanal(p.canal)+'</span><span class="v">'+pillEstado(p.estado)+' '+crc(totalDe(p))+'</span></div>').join('')||'<div class="note">Sin compras registradas.</div>';
+  $('#cli-detalle').innerHTML='<div class="card" id="tour-ficha"><div class="hd"><h3>'+c.nombre+'</h3><button class="btn sm" onclick="document.getElementById(\'cli-detalle\').innerHTML=\'\'">Cerrar</button></div><div class="bd"><div class="grid g2"><div>'+
+    '<div class="info-row"><span class="k">Zona</span><span class="v">'+c.zona+'</span></div>'+
+    '<div class="info-row"><span class="k">Teléfono</span><span class="v">'+c.tel+'</span></div>'+
+    '<div class="info-row"><span class="k">Compras</span><span class="v">'+compras.length+'</span></div>'+
+    '<div class="info-row"><span class="k">Total histórico</span><span class="v">'+crc(gastado)+'</span></div>'+
+    '<div class="note" style="margin-top:12px"><b style="font-size:12px">Notas:</b><br>'+c.notas+'</div></div>'+
+    '<div><h4 style="font-size:13px;color:var(--gray);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Historial de compras</h4>'+hist+'</div></div></div></div>';
+  $('#cli-detalle').scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(tour.active&&TOUR_STEPS[tour.i].target==='#tour-ficha'){placeTimeout();}
+}
+function placeTimeout(){requestAnimationFrame(()=>setTimeout(placeStep,80));}
+
+/* ================= ENVÍOS ================= */
+function renderEnvios(){
+  const activos=PEDIDOS.filter(p=>p.estado!=='cancelado'&&p.estado!=='entregado'&&p.tipo==='mensajeria');
+  const porZona={};ZONAS.forEach(z=>porZona[z]=activos.filter(p=>CLI_BY_ID[p.cliente].zona===z).length);
+  $('#envios-kpis').innerHTML=
+    '<div class="card kpi"><div class="n">'+activos.length+'</div><div class="l">Mensajería por entregar</div></div>'+
+    '<div class="card kpi"><div class="n">'+PEDIDOS.filter(p=>p.estado!=='cancelado'&&p.tipo==='retiro'&&p.estado!=='entregado').length+'</div><div class="l">Retiros en tienda pendientes</div></div>'+
+    '<div class="card kpi"><div class="n">'+activos.filter(p=>p.guia.estado==='en_ruta').length+'</div><div class="l">Con guía en ruta</div></div>'+
+    '<div class="card kpi"><div class="n">'+Object.entries(porZona).filter(([,n])=>n>0).length+'</div><div class="l">Zonas con envíos</div></div>';
+  const rows=PEDIDOS.filter(p=>p.estado!=='cancelado'&&p.estado!=='entregado')
+    .sort((a,b)=>ZONAS.indexOf(CLI_BY_ID[a.cliente].zona)-ZONAS.indexOf(CLI_BY_ID[b.cliente].zona))
+    .map(p=>{
+      const z=CLI_BY_ID[p.cliente].zona;
+      const guiaTxt=p.tipo==='retiro'?'Retiro en tienda':(p.guia.codigo?('Guía '+p.guia.codigo):'Sin guía');
+      const gpill=p.tipo==='retiro'?'<span class="pill s-confirmado">Retiro</span>':
+        (p.guia.estado==='en_ruta'?'<span class="pill s-enviado">En ruta</span>':'<span class="pill s-preparando">Por preparar</span>');
+      return '<tr onclick="go(\'bandeja\');setTimeout(function(){openOrden(\''+p.id+'\')},60)"><td><b>#'+p.id+'</b></td><td>'+CLI_BY_ID[p.cliente].nombre+'</td><td>'+z+'</td><td>'+(p.tipo==='retiro'?'Retiro en tienda':'Mensajería')+'</td><td>'+guiaTxt+'</td><td>'+gpill+'</td><td>'+pillEstado(p.estado)+'</td></tr>';
+    }).join('');
+  $('#envios-table').innerHTML='<thead><tr><th>Pedido</th><th>Cliente</th><th>Zona</th><th>Tipo</th><th>Guía</th><th>Estado guía</th><th>Estado pedido</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7" class="note" style="border:0">Nada por entregar.</td></tr>')+'</tbody>';
+}
+
+/* ================= CAJA ================= */
+function cajaHoy(){
+  const cobrados=PEDIDOS.filter(p=>p.cobrado&&p.fechaCobro===TODAY);
+  const porMetodo={sinpe:0,transferencia:0,efectivo:0};
+  cobrados.forEach(p=>porMetodo[p.pago.metodo]+=totalDe(p));
+  const total=cobrados.reduce((s,p)=>s+totalDe(p),0);
+  return{cobrados,porMetodo,total};
+}
+function renderCaja(){
+  const {cobrados,porMetodo,total}=cajaHoy();
+  const cnt={sinpe:0,transferencia:0,efectivo:0};
+  cobrados.forEach(p=>cnt[p.pago.metodo]++);
+  const pl=n=>n+(n===1?' pedido':' pedidos');
+  $('#caja-kpis').innerHTML=
+    '<div class="card kpi"><div class="n">'+crc(total)+'</div><div class="l">Total del día</div><div class="t">'+pl(cobrados.length)+' cobrados</div></div>'+
+    '<div class="card kpi"><div class="n">'+crc(porMetodo.sinpe)+'</div><div class="l">SINPE Móvil</div><div class="t">'+pl(cnt.sinpe)+'</div></div>'+
+    '<div class="card kpi"><div class="n">'+crc(porMetodo.transferencia)+'</div><div class="l">Transferencia</div><div class="t">'+pl(cnt.transferencia)+'</div></div>'+
+    '<div class="card kpi"><div class="n">'+crc(porMetodo.efectivo)+'</div><div class="l">Efectivo contra entrega</div><div class="t">'+pl(cnt.efectivo)+'</div></div>';
+  const rows=cobrados.slice().sort((a,b)=>b.id.localeCompare(a.id)).map(p=>'<tr><td><b>#'+p.id+'</b></td><td>'+CLI_BY_ID[p.cliente].nombre+'</td><td>'+METODOS[p.pago.metodo]+'</td><td>'+CANAL_LABEL[p.canal]+'</td><td class="num">'+crc(totalDe(p))+'</td></tr>').join('');
+  $('#caja-table').innerHTML='<thead><tr><th>Pedido</th><th>Cliente</th><th>Método</th><th>Canal</th><th class="num">Monto</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="note" style="border:0">Todavía no hay cobros hoy.</td></tr>')+
+    '<tr style="background:#f8faf9"><td colspan="4"><b>Total del día</b></td><td class="num"><b>'+crc(total)+'</b></td></tr></tbody>';
+}
+
+/* ================= INFORMES ================= */
+function renderInformes(){
+  // ventas por día última semana
+  const days=[];for(let i=6;i>=0;i--)days.push(daysAgo(i));
+  const ventasPorDia=days.map(d=>PEDIDOS.filter(p=>p.creado===d&&p.estado!=='cancelado').reduce((s,p)=>s+totalDe(p),0));
+  const maxV=Math.max(1,...ventasPorDia);
+  $('#ch-ventas').innerHTML=days.map((d,i)=>'<div class="col"><div class="cv">'+crc(ventasPorDia[i]).replace('₡','')+'</div><div class="bar'+(d===TODAY?' alt':'')+'" style="height:'+Math.round(ventasPorDia[i]/maxV*140)+'px"></div><div class="cl">'+shortDay(d)+'</div></div>').join('');
+  // productos más vendidos
+  const cnt={};
+  PEDIDOS.filter(p=>p.estado!=='cancelado').forEach(p=>p.items.forEach(([pid,n])=>cnt[pid]=(cnt[pid]||0)+n));
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxP=Math.max(1,...top.map(t=>t[1]));
+  $('#ch-productos').innerHTML=top.map(([pid,n])=>{const pr=PROD_BY_ID[pid];return '<div class="hbar-row"><span class="lb">'+pr.nombre+'</span><span class="tr"><i style="width:'+Math.round(n/maxP*100)+'%"></i></span><span class="vl">'+n+' u.</span></div>';}).join('');
+  // ventas por canal
+  const porCanal={web:0,whatsapp:0,tienda:0};
+  PEDIDOS.filter(p=>p.estado!=='cancelado').forEach(p=>porCanal[p.canal]+=totalDe(p));
+  const totCanal=Object.values(porCanal).reduce((a,b)=>a+b,0)||1;
+  $('#ch-canales').innerHTML=CANALES.map(c=>{const pc=Math.round(porCanal[c.k]/totCanal*100);return '<div class="hbar-row"><span class="lb">'+c.t+'</span><span class="tr"><i style="width:'+pc+'%;background:'+(c.k==='whatsapp'?'#1c7a45':c.k==='web'?'#2f6fb0':'#c7912a')+'"></i></span><span class="vl">'+pc+'%</span></div>';}).join('')+
+    '<div class="note" style="margin-top:12px">Ventas por canal: web '+crc(porCanal.web)+' · WhatsApp '+crc(porCanal.whatsapp)+' · tienda '+crc(porCanal.tienda)+'.</div>';
+  // ticket promedio
+  const validos=PEDIDOS.filter(p=>p.estado!=='cancelado');
+  const tot=validos.reduce((s,p)=>s+totalDe(p),0);
+  const ticket=validos.length?tot/validos.length:0;
+  const ticketCobrados=cajaHoy().cobrados;
+  const ticketHoy=ticketCobrados.length?cajaHoy().total/ticketCobrados.length:0;
+  $('#ch-ticket').innerHTML='<div style="font-size:34px;font-weight:700;color:var(--navy)">'+crc(ticket)+'</div>'+
+    '<div style="color:var(--gray);font-size:13px;margin-bottom:16px">Ticket promedio sobre '+validos.length+' pedidos · '+crc(tot)+' en total</div>'+
+    '<div class="info-row"><span class="k">Ticket promedio de hoy (cobrados)</span><span class="v">'+crc(ticketHoy)+'</span></div>'+
+    '<div class="info-row"><span class="k">Pedidos de la última semana</span><span class="v">'+PEDIDOS.filter(p=>days.includes(p.creado)&&p.estado!=='cancelado').length+'</span></div>'+
+    '<div class="info-row"><span class="k">Unidades vendidas</span><span class="v">'+Object.values(cnt).reduce((a,b)=>a+b,0)+'</span></div>';
+}
+
+/* ================= RECORRIDO GUIADO (8 pasos) ================= */
+const TOUR_STEPS=[
+  {sec:'panel',target:'#tour-panel',title:'El panel del día',text:'Todo lo que hay que resolver hoy en una sola vista: pedidos nuevos sin confirmar, en preparación, listos para enviar, entregados hoy, cobros de SINPE o transferencia por verificar y mensajes de WhatsApp sin responder.'},
+  {sec:'bandeja',target:'#tour-bandeja',title:'La bandeja de pedidos y sus estados',text:'Aquí entran todos los pedidos, vengan de la web, de WhatsApp o de la tienda física. Cada uno muestra su canal de origen, el cliente, los artículos con cantidad y el total en colones, y avanza de estado: nuevo, confirmado, en preparación, enviado y entregado (o cancelado).'},
+  {sec:'bandeja',target:'#orden-detalle',title:'El detalle del pedido y el aviso por WhatsApp',before(){openOrden('P-1041');},text:'Al abrir un pedido se ve el detalle completo, el historial de estados y las acciones para avanzarlo. El botón envía el comprobante o la guía por WhatsApp al '+WHATSAPP+' (aquí es solo la maqueta del mensaje; no se envía nada).'},
+  {sec:'catalogo',target:'#tour-catalogo',title:'Catálogo e inventario con aviso de stock bajo',text:'Todos los productos por categoría —mates, bombillas, yerbas, termos y accesorios— con su precio en colones y el stock. Cuando un producto baja de '+LOW_STOCK+' unidades, el sistema lo marca solo y se puede editar el stock desde la misma pantalla.'},
+  {sec:'clientes',target:'#tour-ficha',title:'La ficha del cliente con su historial',before(){openCliente('c2');},text:'Cada cliente tiene su ficha: zona, teléfono y notas, más el historial completo de compras con el total que lleva gastado. Los datos de ejemplo no son de personas reales.'},
+  {sec:'envios',target:'#tour-envios',title:'Los envíos por zona',text:'Los pedidos por entregar se ordenan por zona —San José, Escazú, Heredia, Cartago y fuera del GAM— y por tipo: retiro en tienda o mensajería, con el estado de la guía de cada uno.'},
+  {sec:'caja',target:'#tour-caja',title:'La caja del día',text:'Cuánto se cobró hoy, separado por SINPE Móvil, transferencia y efectivo contra entrega, con el total del día. Sin números de cuenta ni datos bancarios.'},
+  {sec:'informes',target:'#tour-informes',title:'Los informes',text:'Gráficos propios para decidir: ventas por día de la última semana, productos más vendidos, cuánto entra por la web, por WhatsApp y en tienda, y el ticket promedio.'}
+];
+const tour={active:false,i:0,auto:false,autoT:null,autoStart:0,tickT:null};
+function startTour(){
+  enterApp();
+  tour.active=true;tour.i=0;
+  $('#tour-close').style.display='block';
+  var bt=$('#btn-tour'); if(bt) bt.style.visibility='hidden';
+  showStep(0);
+}
+function endTour(silent){
+  tour.active=false;stopAuto();
+  $('#tour-spot').style.display='none';$('#tour-card').style.display='none';$('#tour-close').style.display='none';
+  var bt=$('#btn-tour'); if(bt) bt.style.visibility='visible';
+  var _d=$('#orden-detalle');if(_d)_d.innerHTML='';
+  var _c=$('#cli-detalle');if(_c)_c.innerHTML='';
+  if(!silent)toast('Recorrido finalizado.');
+}
+function showStep(n){
+  tour.i=Math.max(0,Math.min(TOUR_STEPS.length-1,n));
+  const st=TOUR_STEPS[tour.i];
+  go(st.sec);
+  if(st.before)st.before();
+  tour.active=true;
+  requestAnimationFrame(()=>{setTimeout(()=>placeStep(),70);});
+  renderCard();
+}
+function renderCard(){
+  const st=TOUR_STEPS[tour.i];
+  const n=tour.i+1,tot=TOUR_STEPS.length;
+  $('#tour-card').innerHTML='<div class="step">Paso '+n+' de '+tot+'</div>'+
+    '<h3>'+st.title+'</h3><p>'+st.text+'</p>'+
+    '<div class="prog '+(tour.auto?'on':'')+'"><i id="tour-prog"></i></div>'+
+    '<div class="navrow">'+
+      '<button class="btn sm" onclick="prevStep()" '+(tour.i===0?'disabled style="opacity:.5"':'')+'>Atrás</button>'+
+      '<button class="btn sm primary" onclick="nextStep()">'+(tour.i===tot-1?'Finalizar':'Siguiente')+'</button>'+
+      '<span class="sp"></span>'+
+      '<button class="btn sm" onclick="toggleAuto()">'+(tour.auto?'Pausar':'Automático')+'</button>'+
+      '<button class="btn sm" onclick="endTour()">Salir</button>'+
+    '</div>';
+  $('#tour-card').style.display='block';
+}
+function nextStep(){if(tour.i>=TOUR_STEPS.length-1){endTour();}else{showStep(tour.i+1);}}
+function prevStep(){showStep(tour.i-1);}
+function toggleAuto(){
+  if(tour.auto){stopAuto();}
+  else{
+    tour.auto=true;tour.autoStart=Date.now();
+    var prog=$('#tour-card').querySelector('.prog');if(prog)prog.classList.add('on');
+    tour.autoT=setInterval(()=>{ if(tour.i>=TOUR_STEPS.length-1){stopAuto();return;} showStep(tour.i+1); tour.autoStart=Date.now(); },6000);
+    tour.tickT=setInterval(()=>{const el=$('#tour-prog');if(el){const p=Math.min(100,(Date.now()-tour.autoStart)/6000*100);el.style.width=p+'%';}},100);
+    renderCard();
+  }
+}
+function stopAuto(){tour.auto=false;clearInterval(tour.autoT);clearInterval(tour.tickT);const el=$('#tour-prog');if(el)el.style.width='0';}
+function placeStep(){
+  if(!tour.active)return;
+  const st=TOUR_STEPS[tour.i];
+  const el=document.querySelector(st.target);
+  if(!el){$('#tour-spot').style.display='none';$('#tour-card').style.left='14px';$('#tour-card').style.top='70px';return;}
+  const r=el.getBoundingClientRect();
+  const pad=8;
+  const sp=$('#tour-spot');
+  sp.style.display='block';
+  sp.style.left=(r.left-pad)+'px';
+  sp.style.top=(r.top-pad)+'px';
+  sp.style.width=(r.width+pad*2)+'px';
+  sp.style.height=(r.height+pad*2)+'px';
+  const card=$('#tour-card');
+  const cw=Math.min(380,window.innerWidth-28);
+  const ch=card.offsetHeight||210;
+  let left=r.left;
+  if(left+cw>window.innerWidth-14)left=window.innerWidth-cw-14;
+  if(left<14)left=14;
+  let top=r.bottom+14;
+  if(top+ch>window.innerHeight-14){top=Math.max(14,r.top-ch-14);}
+  card.style.left=left+'px';
+  card.style.top=top+'px';
+}
+window.addEventListener('resize',()=>{if(tour.active)placeStep();});
+window.addEventListener('scroll',()=>{if(tour.active)placeStep();},true);
+document.addEventListener('keydown',e=>{
+  if(!tour.active)return;
+  if(e.key==='ArrowRight')nextStep();
+  else if(e.key==='ArrowLeft')prevStep();
+  else if(e.key==='Escape')endTour();
+});
+
+/* ================= INIT ================= */
+function init(){
+  renderPanel();renderBandeja();renderCatalogo();renderClientes();renderEnvios();renderCaja();renderInformes();
+}
+init();
+</script>
+</body>
+</html>
